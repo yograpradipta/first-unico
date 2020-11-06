@@ -114,7 +114,8 @@ router.route('/profile')
             user.save();
             res.json({
                 success:true,
-                message:'update uccsesfully'
+                message:'update uccsesfully',
+                user:user
             });
         });
     });
@@ -127,7 +128,8 @@ router.route('/address')
         User.findOne({_id:req.decoded.user._id}, (err, user)=>{
             res.json({
                 success:true,
-                address:user.address,
+                user:user,
+                // address:user.address,
                 message:"succesfull"
             });
         });
@@ -159,7 +161,8 @@ router.route('/address')
             user.save();
             res.json({
                 success:true,
-                address:user.address,
+                user:user,
+                // address:user.address,
                 message:'update address succsesfully'
             });
         });
