@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const config= require('../config');
-const checkJWT= require('../midlewares/check-jwt');
+const config = require('../config');
+const checkJWT = require('../midlewares/check-jwt');
+const user = require('../models/user');
 
 // router.get('/', ()=>{
 //     console.log('get Request');
@@ -14,12 +15,13 @@ const checkJWT= require('../midlewares/check-jwt');
 router.post('/signup', (req, res, next) => {
     let user = new User();
     user.name = req.body.name;
-    user.username = req.body.username;
+    user.email = req.body.email;
     user.password = req.body.password;
+    user.birthday = req.body.birthday;
     user.picture = user.gravatar();
 
     User.findOne({
-        username: req.body.username
+        email: req.body.email
     }, (err, existingUser) => {
         if (existingUser) {
             res.json({
@@ -32,7 +34,7 @@ router.post('/signup', (req, res, next) => {
 
             var token = jwt.sign({
                 user: user
-            }, config.secret , {
+            }, config.secret, {
                 expiresIn: '7d'
             });
 
@@ -47,33 +49,33 @@ router.post('/signup', (req, res, next) => {
 });
 //end API Signup
 // start API Login
-router.post('/login', async (req, res, next)=>{
-    User.findOne({username: req.body.username}, (err, user)=>{
-        if(err)
-        throw err;
+router.post('/login', async (req, res, next) => {
+    User.findOne({
+        email: req.body.email
+    }, (err, user) => {
+        if (err)
+            throw err;
         if (!user) {
             res.json({
-                success:false,
-                message:"Authentification failed, user not found"
+                success: false,
+                message: "Authentification failed, user not found"
             });
-        }
-        else if (user) {
-            var validPass= user.comparePassword(req.body.password);
+        } else if (user) {
+            var validPass = user.comparePassword(req.body.password);
             if (!validPass) {
                 res.json({
                     success: false,
-                    message:"authtentication failed, wrong password"
+                    message: "authtentication failed, wrong password"
                 });
-            }
-            else{
+            } else {
                 var token = jwt.sign({
                     user: user
-                }, config.secret , {
+                }, config.secret, {
                     expiresIn: '7d'
                 });
                 res.json({
-                    success:true,
-                    message:"enjoy your token",
+                    success: true,
+                    message: "enjoy your token",
                     token: token
                 });
             }
@@ -82,40 +84,54 @@ router.post('/login', async (req, res, next)=>{
 });
 // end API login
 
+// get all user
+router.route('/user').get((req, res, next)=>{
+    user.find({}, (err, user)=>{
+        res.json({
+            user:user
+        });
+    });
+});
+
+
 /* API User */
 router.route('/profile')
     // API show user
-    .get(checkJWT, (req,res,next)=>{
-        User.findOne({_id:req.decoded.user._id}, (err, user)=>{
+    .get(checkJWT, (req, res, next) => {
+        User.findOne({
+            _id: req.decoded.user._id
+        }, (err, user) => {
             res.json({
-                success:true,
-                user:user,
-                message:"succesfull"
+                success: true,
+                user: user,
+                message: "succesfull"
             });
         });
     })
     // API edit user
-    .post(checkJWT, (req, res, next)=>{
-        User.findOne({_id:req.decoded.user._id}, (err, user)=>{
+    .post(checkJWT, (req, res, next) => {
+        User.findOne({
+            _id: req.decoded.user._id
+        }, (err, user) => {
             if (err) {
                 return next(err);
             }
             if (req.body.name) {
-                user.name= req.body.name;
+                user.name = req.body.name;
             }
-            if (req.body.username) {
-                user.username= req.body.username;
+            if (req.body.email) {
+                user.email = req.body.email;
             }
-            if (req.body.password){
-                user.password= req.body.password;   
+            if (req.body.password) {
+                user.password = req.body.password;
             }
-            user.isSeller= req.body.isSeller;
+            user.isSeller = req.body.isSeller;
 
             user.save();
             res.json({
-                success:true,
-                message:'update uccsesfully',
-                user:user
+                success: true,
+                message: 'update uccsesfully',
+                user: user
             });
         });
     });
@@ -124,46 +140,50 @@ router.route('/profile')
 /* Start API Addres */
 router.route('/address')
     // API show Address
-    .get(checkJWT, (req,res,next)=>{
-        User.findOne({_id:req.decoded.user._id}, (err, user)=>{
+    .get(checkJWT, (req, res, next) => {
+        User.findOne({
+            _id: req.decoded.user._id
+        }, (err, user) => {
             res.json({
-                success:true,
-                user:user,
+                success: true,
+                user: user,
                 // address:user.address,
-                message:"succesfull"
+                message: "succesfull"
             });
         });
     })
     // API edit Address
-    .post(checkJWT, (req, res, next)=>{
-        User.findOne({_id:req.decoded.user._id}, (err, user)=>{
+    .post(checkJWT, (req, res, next) => {
+        User.findOne({
+            _id: req.decoded.user._id
+        }, (err, user) => {
             if (err) {
                 return next(err);
             }
             if (req.body.addr1) {
-                user.address.addr1=req.body.addr1;
+                user.address.addr1 = req.body.addr1;
             }
             if (req.body.addr2) {
-                user.address.addr2=req.body.addr2;
+                user.address.addr2 = req.body.addr2;
             }
             if (req.body.city) {
-                user.address.city=req.body.city;
+                user.address.city = req.body.city;
             }
             if (req.body.state) {
-                user.address.state=req.body.state;
+                user.address.state = req.body.state;
             }
             if (req.body.country) {
-                user.address.country=req.body.country;
+                user.address.country = req.body.country;
             }
             if (req.body.postalCode) {
-                user.address.postalCode=req.body.postalCode;
+                user.address.postalCode = req.body.postalCode;
             }
             user.save();
             res.json({
-                success:true,
-                user:user,
+                success: true,
+                user: user,
                 // address:user.address,
-                message:'update address succsesfully'
+                message: 'update address succsesfully'
             });
         });
     });
@@ -183,7 +203,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res) => {
     const user = new User({
         name: req.body.name,
-        username: req.body.username,
+        email: req.body.email,
         password: req.body.password
     })
     try {

@@ -9,13 +9,18 @@ const userSchema = new schema({
         type: String,
         required: true
     },
-    username: {
+    email: {
         type: String,
-        required: true
+        required: true,
+        unique:true,
+        lowercase:true
     },
     password: {
         type: String,
         required: true
+    },
+    birthday: {
+        type: Date
     },
     isSeller: {
         type: Boolean,
