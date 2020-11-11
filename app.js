@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+const config = require('./config');
 
 const app= express();
 
@@ -36,6 +37,6 @@ const mainRoutes= require('./routers/main');
 app.use('/app/', mainRoutes);
 app.use('/app',appRouter);
 
-app.listen(3030, function(){
+app.listen(config.port, function(){
     console.log("server started in 3030")
 })
