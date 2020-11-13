@@ -6,10 +6,6 @@ const config = require('../config');
 const checkJWT = require('../midlewares/check-jwt');
 const user = require('../models/user');
 
-// router.get('/', ()=>{
-//     console.log('get Request');
-// })
-// let secret='YograPradipta2020';
 
 //start API Signup
 router.post('/signup', (req, res, next) => {
@@ -85,13 +81,21 @@ router.post('/login', async (req, res, next) => {
 // end API login
 
 // get all user
-router.route('/user').get((req, res, next)=>{
+router.route('/user').get(checkJWT,(req, res, next)=>{
     user.find({}, (err, user)=>{
         res.json({
             user:user
         });
     });
 });
+/* router.route('/user').get((req, res, next)=>{
+    user.find({
+    }, (err, user)=>{
+        res.json({
+            user:user
+        });
+    });
+}); */
 
 
 /* API User */

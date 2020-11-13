@@ -8,7 +8,7 @@ const config = require('./config');
 const app= express();
 
 const url = 'mongodb://yograpradipta:yogra2020@cluster0-shard-00-00.xx8ws.mongodb.net:27017,cluster0-shard-00-01.xx8ws.mongodb.net:27017,cluster0-shard-00-02.xx8ws.mongodb.net:27017/dbmypro?ssl=true&replicaSet=atlas-39xxc5-shard-0&authSource=admin&retryWrites=true&w=majority';
-
+// const url ='mongodb://localhost:27017/dbsti'
 
 mongoose.connect(url, {
     useNewUrlParser: true,
@@ -32,9 +32,11 @@ app.use(express.json());
 app.use(cors());
 
 const appRouter= require('./routers/route');
-const mainRoutes= require('./routers/main');
+// const mainRoutes= require('./routers/main');
 
-app.use('/app/', mainRoutes);
+//pasport js
+
+// app.use('/app/', mainRoutes);
 app.use('/app',appRouter);
 
 app.listen(config.port, function(){
